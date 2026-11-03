@@ -13,13 +13,13 @@
 <link rel="preload" as="image" href="frames/000.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Young+Serif&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Young+Serif&family=Questrial&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --pink:#f3d7c0; --cream:#efe5d3; --green:#1f4435; --leaf:#2a4a33; --ink:#2e4630; --red:#a63a2b; --label:#b4472f;
   --text:#4a3d2f; --paper:#fbf7ef;
   --serif:"Fraunces",Georgia,"Times New Roman",serif; --display:"Young Serif","Fraunces",Georgia,serif;
-  --sans:"Inter",system-ui,-apple-system,sans-serif;
+  --sans:"Inter",system-ui,-apple-system,sans-serif; --ui:"Questrial","Inter",system-ui,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:var(--pink);color:var(--ink);color-scheme:light}
@@ -37,36 +37,36 @@ body{font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidde
 
 /* NAV */
 .navbg{left:0;top:0;width:100%;height:9.4%;background:var(--pink);border-bottom:1px solid rgba(46,70,48,.08)}
-.logo{left:2.5%;top:3.1%;font-family:var(--display);font-weight:400;font-size:2.55cqw;color:var(--ink);text-decoration:none;letter-spacing:-.01em;line-height:1}
+.logo{left:2.6%;top:2.6%;font-family:var(--display);font-weight:400;font-size:3.2cqw;letter-spacing:.01em;color:var(--ink);text-decoration:none;letter-spacing:-.01em;line-height:1}
 .nav{left:0;top:4.4%;width:100%}
-.nav a{position:absolute;transform:translateX(-50%);font-size:1.12cqw;font-weight:500;color:var(--ink);text-decoration:none;white-space:nowrap;transition:opacity .2s}
+.nav a{position:absolute;transform:translateX(-50%);font-family:var(--ui);letter-spacing:.03em;font-size:1.45cqw;font-weight:400;color:var(--ink);text-decoration:none;white-space:nowrap;transition:opacity .2s}
 .nav a:hover{opacity:.6}
 .nav a.on::after{content:"";position:absolute;left:-12%;right:-12%;bottom:-1.25cqw;height:1.5px;background:var(--ink)}
 .search{left:81.6%;top:4.2%;width:1.6cqw;height:1.6cqw;border:0;background:none;color:var(--ink);cursor:pointer}
-.signin{left:85.8%;top:3.6%;width:8.2%;height:4.4%;border-radius:999px;background:var(--leaf);color:#f4ecdc;display:flex;align-items:center;justify-content:center;
+.signin{font-family:var(--ui);letter-spacing:.03em;-webkit-text-stroke:.03cqw currentColor;left:85.8%;top:3.6%;width:8.2%;height:4.4%;border-radius:999px;background:var(--leaf);color:#f4ecdc;display:flex;align-items:center;justify-content:center;
   font-size:1.05cqw;font-weight:600;text-decoration:none;transition:background-color .2s}
 .signin:hover{background:#3a6145}
 .burger{left:96%;top:4.5%;width:1.8cqw;height:1.4cqw;border:0;background:none;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer}
 .burger span{display:block;height:1.6px;background:var(--ink);border-radius:2px}
 
 /* text */
-.label{font-size:1.25cqw;font-weight:600;letter-spacing:.01em;white-space:nowrap}
+.label{font-family:var(--ui);font-size:1.75cqw;font-weight:400;letter-spacing:.03em;-webkit-text-stroke:.03cqw currentColor;letter-spacing:.01em;white-space:nowrap}
 .h{font-family:var(--display);font-weight:400;letter-spacing:-.01em;white-space:nowrap}
-.p{font-size:1.3cqw;line-height:1.5;color:var(--text)}
-.btn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;font-size:1.12cqw;font-weight:600;text-decoration:none;white-space:nowrap;
+.p{font-family:var(--ui);font-size:1.7cqw;line-height:1.21;letter-spacing:.035em;color:var(--text);white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;font-family:var(--ui);letter-spacing:.04em;-webkit-text-stroke:.025cqw currentColor;font-size:1.4cqw;font-weight:400;text-decoration:none;white-space:nowrap;
   transition:transform .2s ease, background-color .2s, color .2s}
 .btn:hover{transform:translateY(-1px)}
 .btn.solid{background:var(--leaf);color:#f4ecdc}.btn.solid:hover{background:#3a6145}
 .btn.line{border:1.5px solid var(--red);color:var(--red)}.btn.line:hover{background:var(--red);color:#fbf1e6}
-.circ{width:3.6cqw;height:3.6cqw;border-radius:50%;background:rgba(255,255,255,.85);box-shadow:0 .2cqw .8cqw rgba(60,30,10,.12);display:flex;align-items:center;justify-content:center;
+.circ{width:4cqw;height:4cqw;border-radius:50%;background:rgba(255,255,255,.85);box-shadow:0 .2cqw .8cqw rgba(60,30,10,.12);display:flex;align-items:center;justify-content:center;
   color:var(--ink);font-size:1.8cqw;line-height:1;transform:translate(-50%,-50%);border:0;cursor:pointer}
 .hdots{display:flex;gap:1.35cqw;transform:translateX(-50%)}
 .hdots i{width:.75cqw;height:.75cqw;border-radius:50%;background:rgba(46,70,48,.25);cursor:pointer}.hdots i.on{background:var(--ink)}
-.pill{border:1.5px solid rgba(239,233,214,.8);border-radius:999px;color:#efe9d6;font-size:.82cqw;font-weight:700;letter-spacing:.16em;display:flex;align-items:center;justify-content:center;transform:translateX(-50%)}
+.pill{border:.16cqw solid #efe9d6;border-radius:999px;color:#efe9d6;font-family:var(--ui);-webkit-text-stroke:.05cqw currentColor;font-size:1.05cqw;font-weight:400;letter-spacing:.1em;display:flex;align-items:center;justify-content:center;transform:translateX(-50%)}
 .final-h{color:#efe9d6;transform:translateX(-50%);text-align:center}
-.final-p{color:#e9e2cf;text-align:center;transform:translateX(-50%);font-size:1.25cqw;line-height:1.5}
+.final-p{color:#f1ecdc;text-align:center;transform:translateX(-50%);font-family:var(--ui);-webkit-text-stroke:.04cqw currentColor;letter-spacing:.04em;font-size:1.62cqw;line-height:1.08;white-space:nowrap}
 .final-p a{color:inherit}
-.btn.cream{background:#efe6d2;color:var(--green);letter-spacing:.12em;font-weight:700;font-size:1.08cqw;transform:translateX(-50%)}
+.btn.cream{background:#efe6d2;color:var(--green);letter-spacing:.12em;font-weight:400;font-size:1.3cqw;transform:translateX(-50%)}
 .btn.cream:hover{transform:translateX(-50%) translateY(-1px);background:#fff8ea}
 .chat.out{background:transparent;border-color:transparent}
 .chat{transition:background-color .3s,border-color .3s;left:95.3%;top:94.3%;width:4.3cqw;height:4.3cqw;border-radius:50%;background:var(--leaf);border:1.5px solid rgba(239,233,214,.35);transform:translate(-50%,-50%);
@@ -114,7 +114,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
   .m-sec.on{opacity:1;transform:none;pointer-events:auto}
   .m-sec .label{font-size:12px}
   .m-h{font-family:var(--display);font-weight:400;letter-spacing:-.01em;line-height:1.02;font-size:clamp(34px,10.5vw,50px)}
-  .m-p{font-size:14px;line-height:1.55;color:var(--text);max-width:34ch}
+  .m-p{font-family:var(--ui);letter-spacing:.02em;font-size:14.5px;line-height:1.5;color:var(--text);max-width:34ch}
   .m-btn{font-size:12px;padding:12px 20px}
   .m-sec.dark{align-items:center;text-align:center}
   .m-sec.dark .m-h{color:#efe9d6}.m-sec.dark .m-p{color:#e9e2cf}
@@ -133,8 +133,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
 <nav class="menu-ov" id="menu" aria-hidden="true">
   <button class="close" id="mclose" aria-label="Close menu">×</button>
   <div class="in">
-    <a href="#" data-go="0">Home</a><a href="#" data-go="68">About</a><a href="#" data-go="232">Pizzas</a>
-    <a href="#" data-go="150">Blog</a><a href="#" data-go="232">Support</a><a href="#" data-go="232">Contact</a>
+    <a href="#" data-go="0">Home</a><a href="#" data-go="68">About</a><a href="#" data-go="232">Protos</a>
+    <a href="#" data-go="150">Bogs</a><a href="#" data-go="232">Support</a><a href="#" data-go="232">Contact</a>
     <div class="foot">Wood-fired · handmade daily</div>
   </div>
 </nav>
@@ -151,19 +151,19 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
     <section class="m-sec on">
       <div class="label" style="color:var(--label)">Section 1</div>
       <h1 class="m-h" style="color:var(--ink)">Fresh has<br>a wild side.</h1>
-      <p class="m-p">Sun-ripened tomatoes, wild basil and flour milled the old way. Our pizza starts in the garden.</p>
-      <a href="#" data-go="68" class="btn solid m-btn">Learn more</a>
+      <p class="m-p">Lorem ipsum wil is wiet componible for eeore mtaring alit. emor was to aeccunul cotgratat formains, and cotloes.</p>
+      <a href="#" data-go="68" class="btn solid m-btn">Been more</a>
     </section>
     <section class="m-sec">
       <div class="label" style="color:var(--red)">Section 2.</div>
       <h2 class="m-h" style="color:var(--red)">It all comes<br>together.</h2>
-      <p class="m-p">The tastiest sauce starts simple: ripe tomatoes crushed by hand, fresh basil and a drizzle of olive oil.</p>
+      <p class="m-p">The toreed camoe of ail emery beingegilt. en cioditot crecate their tumigm, and dototat alleff creooe.</p>
       <a href="#" data-go="150" class="btn line m-btn">Read more</a>
     </section>
     <section class="m-sec dark">
-      <div class="pill">HANDMADE DAILY</div>
+      <div class="pill">YLAIOE BAKE TWE</div>
       <h2 class="m-h">Wildly good pizza</h2>
-      <p class="m-p">Wood-fired in 90 seconds, topped with fresh mozzarella. <a href="#" data-go="232" style="color:inherit">Pick your pizza.</a></p>
+      <p class="m-p">Lorem laum dinibols ias soocoe pooles and hamo text poaldemgepe, cladies, with <a href="#" data-go="232" style="color:inherit">pick your pizza.</a></p>
       <a href="#" data-go="232" class="btn cream m-btn">PICK YOUR FAVOURITE</a>
     </section>
   </div>
@@ -178,8 +178,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
     <div class="grp" id="g1">
       <div class="abs label" style="left:18.3%;top:26.4%;color:var(--label);border-bottom:1.5px solid currentColor;padding-bottom:.25cqw">Section 1</div>
       <h1 class="abs h" style="left:18.1%;top:31.4%;font-size:7.8cqw;line-height:.9;color:var(--ink)">Fresh has<br>a wild side.</h1>
-      <p class="abs p" style="left:18.6%;top:57.8%;width:33.4%">Sun-ripened tomatoes, wild basil and flour milled the old way. Every Wilda pizza starts in the garden and ends in the fire.</p>
-      <a href="#" data-go="68" class="abs btn solid" style="left:18.6%;top:70.5%;width:13.6%;height:5%">Learn more</a>
+      <p class="abs p" style="left:18.6%;top:57.8%;width:33.4%">Lorem ipsum wil is wiet componible for<br>eeore mtaring alit. emor was to aeccunul<br>cotgratat formains, and cotloes.</p>
+      <a href="#" data-go="68" class="abs btn solid" style="left:18.6%;top:70.5%;width:13.6%;height:5%">Been more</a>
       <button class="abs circ" style="left:3.7%;top:51%" aria-label="Previous" data-go="0">‹</button>
       <button class="abs circ" style="left:95.8%;top:50.2%" aria-label="Next" data-go="68">›</button>
       <div class="abs hdots" style="left:49.7%;top:90.2%"><i class="on" data-go="0"></i><i data-go="68"></i><i data-go="150"></i><i data-go="232"></i></div>
@@ -188,15 +188,15 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
     <div class="grp" id="g2">
       <div class="abs label" style="left:14.6%;top:17.6%;color:var(--red)">Section 2.</div>
       <h2 class="abs h" style="left:14.5%;top:21.2%;font-size:5.95cqw;line-height:.92;color:var(--red)">It all comes<br>together.</h2>
-      <p class="abs p" style="left:14.75%;top:43.6%;width:27.5%">The tastiest sauce starts simple: ripe tomatoes crushed by hand, fresh basil and olive oil.</p>
+      <p class="abs p" style="left:14.75%;top:43.6%;width:27.5%">The toreed camoe of ail emery<br>beingegilt. en cioditot crecate their<br>tumigm, and dototat alleff creooe.</p>
       <a href="#" data-go="150" class="abs btn line" style="left:14.75%;top:55.8%;width:12.4%;height:5%">Read more</a>
       <button class="abs circ" style="left:95.9%;top:50%" aria-label="Next" data-go="150">›</button>
     </div>
     <!-- 3. wildly good pizza -->
     <div class="grp" id="g3">
-      <div class="abs pill" style="left:50.3%;top:12.6%;width:17.4%;height:4.4%">HANDMADE DAILY</div>
+      <div class="abs pill" style="left:50.3%;top:12.6%;width:17.4%;height:4.4%">YLAIOE BAKE TWE</div>
       <h2 class="abs h final-h" style="left:50%;top:17.3%;font-size:7.9cqw;line-height:1.05">Wildly good pizza</h2>
-      <p class="abs final-p" style="left:50%;top:80.4%;width:42%">Wood-fired in 90 seconds and topped with fresh mozzarella. <a href="#" data-go="232">Pick your pizza.</a></p>
+      <p class="abs final-p" style="left:50%;top:80.4%;width:42%">Lorem laum dinibols ias soocoe pooles and hamo text<br>poaldemgepe, cladies, with <a href="#" data-go="232">pick your pizza.</a></p>
       <a href="#" data-go="232" class="abs btn cream" style="left:50%;top:87.6%;width:24.1%;height:5.6%">PICK YOUR FAVOURITE</a>
     </div>
 
@@ -208,8 +208,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
     <nav class="abs nav">
       <a href="#" class="on" data-go="0" data-sec="0" style="left:37.7%">Home</a>
       <a href="#" data-go="68" data-sec="1" style="left:44.3%">About</a>
-      <a href="#" data-go="232" data-sec="3" style="left:51.2%">Pizzas</a>
-      <a href="#" data-go="150" data-sec="2" style="left:57.6%">Blog</a>
+      <a href="#" data-go="232" data-sec="3" style="left:51.2%">Protos</a>
+      <a href="#" data-go="150" data-sec="2" style="left:57.6%">Bogs</a>
       <a href="#" data-go="232" style="left:64.4%">Support</a>
       <a href="#" data-go="232" style="left:72.3%">Contact</a>
     </nav>
