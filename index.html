@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wilda Pizza</title>
+<meta name="description" content="Wilda - wildly good wood-fired pizza. Fresh has a wild side.">
+<meta name="theme-color" content="#f3d7c0">
+<meta property="og:title" content="Wilda - Wildly good pizza">
+<meta property="og:description" content="Sun-ripened tomatoes, fresh basil and a wood-fired oven. Fresh has a wild side.">
+<meta property="og:image" content="frames/232.webp">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='36' r='22' fill='%23d8432f'/%3E%3Cpath d='M32 14c-6-6-14-4-16 0 6 1 10 3 16 6 6-3 10-5 16-6-2-4-10-6-16 0z' fill='%232e5a35'/%3E%3C/svg%3E">
+<link rel="preload" as="image" href="frames/000.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Young+Serif&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pink:#f3d7c0; --cream:#efe5d3; --green:#1f4435; --leaf:#2a4a33; --ink:#2e4630; --red:#a63a2b; --label:#b4472f;
+  --text:#4a3d2f; --paper:#fbf7ef;
+  --serif:"Fraunces",Georgia,"Times New Roman",serif; --display:"Young Serif","Fraunces",Georgia,serif;
+  --sans:"Inter",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--pink);color:var(--ink);color-scheme:light}
+body{font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+#scroller{height:900vh}
+
+/* 16:10 stage that covers the viewport (anchored top) */
+#stage{position:fixed;left:50%;top:0;transform:translateX(-50%);width:max(100vw,160vh);aspect-ratio:16/10;overflow:hidden;background:var(--pink)}
+#stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+/* coordinate space of the original screen (frames are cropped ~1.2% at each edge) */
+#space{position:absolute;left:-1.2268%;top:-1.227%;width:103.093%;height:102.249%;container-type:size}
+.abs{position:absolute}
+.grp{position:absolute;left:0;top:0;width:100%;height:100%;will-change:transform}
+
+/* NAV */
+.navbg{left:0;top:0;width:100%;height:9.4%;background:var(--pink);border-bottom:1px solid rgba(46,70,48,.08)}
+.logo{left:2.5%;top:3.1%;font-family:var(--display);font-weight:400;font-size:2.55cqw;color:var(--ink);text-decoration:none;letter-spacing:-.01em;line-height:1}
+.nav{left:0;top:4.4%;width:100%}
+.nav a{position:absolute;transform:translateX(-50%);font-size:1.12cqw;font-weight:500;color:var(--ink);text-decoration:none;white-space:nowrap;transition:opacity .2s}
+.nav a:hover{opacity:.6}
+.nav a.on::after{content:"";position:absolute;left:-12%;right:-12%;bottom:-1.25cqw;height:1.5px;background:var(--ink)}
+.search{left:81.6%;top:4.2%;width:1.6cqw;height:1.6cqw;border:0;background:none;color:var(--ink);cursor:pointer}
+.signin{left:85.8%;top:3.6%;width:8.2%;height:4.4%;border-radius:999px;background:var(--leaf);color:#f4ecdc;display:flex;align-items:center;justify-content:center;
+  font-size:1.05cqw;font-weight:600;text-decoration:none;transition:background-color .2s}
+.signin:hover{background:#3a6145}
+.burger{left:96%;top:4.5%;width:1.8cqw;height:1.4cqw;border:0;background:none;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer}
+.burger span{display:block;height:1.6px;background:var(--ink);border-radius:2px}
+
+/* text */
+.label{font-size:1.25cqw;font-weight:600;letter-spacing:.01em;white-space:nowrap}
+.h{font-family:var(--display);font-weight:400;letter-spacing:-.01em;white-space:nowrap}
+.p{font-size:1.3cqw;line-height:1.5;color:var(--text)}
+.btn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;font-size:1.12cqw;font-weight:600;text-decoration:none;white-space:nowrap;
+  transition:transform .2s ease, background-color .2s, color .2s}
+.btn:hover{transform:translateY(-1px)}
+.btn.solid{background:var(--leaf);color:#f4ecdc}.btn.solid:hover{background:#3a6145}
+.btn.line{border:1.5px solid var(--red);color:var(--red)}.btn.line:hover{background:var(--red);color:#fbf1e6}
+.circ{width:3.6cqw;height:3.6cqw;border-radius:50%;background:rgba(255,255,255,.85);box-shadow:0 .2cqw .8cqw rgba(60,30,10,.12);display:flex;align-items:center;justify-content:center;
+  color:var(--ink);font-size:1.8cqw;line-height:1;transform:translate(-50%,-50%);border:0;cursor:pointer}
+.hdots{display:flex;gap:1.35cqw;transform:translateX(-50%)}
+.hdots i{width:.75cqw;height:.75cqw;border-radius:50%;background:rgba(46,70,48,.25);cursor:pointer}.hdots i.on{background:var(--ink)}
+.pill{border:1.5px solid rgba(239,233,214,.8);border-radius:999px;color:#efe9d6;font-size:.82cqw;font-weight:700;letter-spacing:.16em;display:flex;align-items:center;justify-content:center;transform:translateX(-50%)}
+.final-h{color:#efe9d6;transform:translateX(-50%);text-align:center}
+.final-p{color:#e9e2cf;text-align:center;transform:translateX(-50%);font-size:1.25cqw;line-height:1.5}
+.final-p a{color:inherit}
+.btn.cream{background:#efe6d2;color:var(--green);letter-spacing:.12em;font-weight:700;font-size:1.08cqw;transform:translateX(-50%)}
+.btn.cream:hover{transform:translateX(-50%) translateY(-1px);background:#fff8ea}
+.chat{left:95.3%;top:94.3%;width:4.3cqw;height:4.3cqw;border-radius:50%;background:var(--leaf);border:1.5px solid rgba(239,233,214,.35);transform:translate(-50%,-50%);
+  display:flex;align-items:center;justify-content:center;cursor:pointer}
+
+/* shared overlay menu */
+.menu-ov{position:fixed;inset:0;z-index:50;background:var(--cream);display:flex;flex-direction:column;justify-content:center;
+  padding:calc(env(safe-area-inset-top,0px) + 70px) max(28px,env(safe-area-inset-right,0px)) 40px max(28px,env(safe-area-inset-left,0px));
+  opacity:0;visibility:hidden;transition:opacity .35s ease,visibility .35s}
+.menu-ov.open{opacity:1;visibility:visible}
+.menu-ov .in{width:min(560px,100%);margin:0 auto;display:flex;flex-direction:column}
+.menu-ov a{font-family:var(--serif);font-weight:600;font-size:clamp(28px,4.2vw,46px);color:var(--ink);text-decoration:none;padding:8px 0;border-bottom:1px solid rgba(46,70,48,.14);
+  transform:translateY(12px);opacity:0;transition:transform .5s cubic-bezier(.2,.7,.2,1),opacity .5s}
+.menu-ov.open a{transform:none;opacity:1}
+.menu-ov a:hover{color:var(--red)}
+.menu-ov .close{position:absolute;right:max(22px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px) + 18px);width:46px;height:46px;border-radius:50%;border:0;background:var(--leaf);color:#f4ecdc;font-size:24px;cursor:pointer}
+.menu-ov .foot{margin-top:28px;font-size:13px;color:var(--text)}
+#loader{position:fixed;inset:0;z-index:60;background:var(--pink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .6s ease,visibility .6s}
+#loader.done{opacity:0;visibility:hidden}
+#loader .lg{font-family:var(--display);font-weight:400;font-size:clamp(30px,3.4vw,46px);color:var(--ink)}
+#loader .bar{width:min(220px,50vw);height:2px;background:rgba(46,70,48,.15);overflow:hidden;border-radius:2px}
+#loader .bar i{display:block;height:100%;width:0;background:var(--ink);transition:width .25s ease}
+#loader .pc{font-size:11px;letter-spacing:.14em;color:var(--text);font-variant-numeric:tabular-nums}
+a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset:3px;border-radius:999px}
+
+/* ---------- PHONE ---------- */
+#m{display:none}
+@media (max-width:760px), (max-aspect-ratio:4/5){
+  #stage{display:none}
+  #scroller{height:800vh}
+  #m{display:block;position:fixed;inset:0;overflow:hidden;background:var(--pink)}
+  #mcv{position:absolute;left:0;top:0;width:100%;height:64%;display:block}
+  .m-top{position:absolute;left:0;right:0;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:calc(env(safe-area-inset-top,0px) + 12px) max(18px,env(safe-area-inset-right,0px)) 12px max(18px,env(safe-area-inset-left,0px));
+    background:var(--mbar,var(--pink));border-bottom:1px solid rgba(46,70,48,.08)}
+  .m-logo{font-family:var(--display);font-weight:400;font-size:25px;color:var(--ink);text-decoration:none}
+  .m-right{display:flex;align-items:center;gap:10px}
+  .m-sign{background:var(--leaf);color:#f4ecdc;border-radius:999px;padding:9px 16px;font-size:12px;font-weight:600;text-decoration:none}
+  .m-burger{width:40px;height:40px;border-radius:50%;background:transparent;border:1.5px solid rgba(46,70,48,.25);display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center;cursor:pointer}
+  .m-burger span{display:block;width:16px;height:1.8px;background:var(--ink);border-radius:2px}
+  .m-panel{position:absolute;left:0;right:0;bottom:0;height:46%;z-index:3;background:linear-gradient(rgba(0,0,0,0),var(--mpanel,var(--pink)) 14%)}
+  #m{transition:background-color .45s}
+  .m-sec{position:absolute;left:max(22px,env(safe-area-inset-left,0px));right:max(22px,env(safe-area-inset-right,0px));top:30px;
+    display:flex;flex-direction:column;align-items:flex-start;gap:10px;opacity:0;transform:translateY(18px);transition:opacity .45s,transform .45s;pointer-events:none}
+  .m-sec.on{opacity:1;transform:none;pointer-events:auto}
+  .m-sec .label{font-size:12px}
+  .m-h{font-family:var(--display);font-weight:400;letter-spacing:-.01em;line-height:1.02;font-size:clamp(34px,10.5vw,50px)}
+  .m-p{font-size:14px;line-height:1.55;color:var(--text);max-width:34ch}
+  .m-btn{font-size:12px;padding:12px 20px}
+  .m-sec.dark{align-items:center;text-align:center}
+  .m-sec.dark .m-h{color:#efe9d6}.m-sec.dark .m-p{color:#e9e2cf}
+  .m-sec.dark .pill{transform:none;padding:6px 12px;font-size:10px}
+  .m-sec.dark .btn.cream{transform:none;font-size:11px;padding:13px 22px}
+  .m-chat{position:absolute;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 14px);z-index:4;width:44px;height:44px;border-radius:50%;
+    background:var(--leaf);border:1.5px solid rgba(239,233,214,.35);display:flex;align-items:center;justify-content:center}
+}
+@media (max-width:760px) and (max-height:620px){ .m-p{display:none} }
+@media (prefers-reduced-motion:reduce){ .menu-ov,.menu-ov a,#loader,.m-sec{transition:none!important} }
+</style>
+</head>
+<body>
+<div id="scroller"></div>
+<div id="loader" aria-live="polite"><div class="lg">Wilda</div><div class="bar"><i id="lbar"></i></div><div class="pc" id="lpc">0%</div></div>
+<nav class="menu-ov" id="menu" aria-hidden="true">
+  <button class="close" id="mclose" aria-label="Close menu">×</button>
+  <div class="in">
+    <a href="#" data-go="0">Home</a><a href="#" data-go="68">About</a><a href="#" data-go="232">Pizzas</a>
+    <a href="#" data-go="150">Blog</a><a href="#" data-go="232">Support</a><a href="#" data-go="232">Contact</a>
+    <div class="foot">Wood-fired · handmade daily</div>
+  </div>
+</nav>
+
+<!-- PHONE -->
+<div id="m">
+  <canvas id="mcv"></canvas>
+  <header class="m-top">
+    <a href="#" data-go="0" class="m-logo">Wilda</a>
+    <div class="m-right"><a href="#" data-go="232" class="m-sign">Sign In</a>
+      <button class="m-burger" data-open-menu aria-label="Open menu"><span></span><span></span><span></span></button></div>
+  </header>
+  <div class="m-panel" id="mpanel">
+    <section class="m-sec on">
+      <div class="label" style="color:var(--label)">Section 1</div>
+      <h1 class="m-h" style="color:var(--ink)">Fresh has<br>a wild side.</h1>
+      <p class="m-p">Sun-ripened tomatoes, wild basil and flour milled the old way. Our pizza starts in the garden.</p>
+      <a href="#" data-go="68" class="btn solid m-btn">Learn more</a>
+    </section>
+    <section class="m-sec">
+      <div class="label" style="color:var(--red)">Section 2.</div>
+      <h2 class="m-h" style="color:var(--red)">It all comes<br>together.</h2>
+      <p class="m-p">The tastiest sauce starts simple: ripe tomatoes crushed by hand, fresh basil and a drizzle of olive oil.</p>
+      <a href="#" data-go="150" class="btn line m-btn">Read more</a>
+    </section>
+    <section class="m-sec dark">
+      <div class="pill">HANDMADE DAILY</div>
+      <h2 class="m-h">Wildly good pizza</h2>
+      <p class="m-p">Wood-fired in 90 seconds, topped with fresh mozzarella. <a href="#" data-go="232" style="color:inherit">Pick your pizza.</a></p>
+      <a href="#" data-go="232" class="btn cream m-btn">PICK YOUR FAVOURITE</a>
+    </section>
+  </div>
+  <button class="m-chat" aria-label="Chat with us"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f4ecdc" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></button>
+</div>
+
+<!-- DESKTOP -->
+<div id="stage">
+  <canvas id="cv"></canvas>
+  <div id="space">
+    <!-- 1. hero -->
+    <div class="grp" id="g1">
+      <div class="abs label" style="left:18.3%;top:26.4%;color:var(--label);border-bottom:1.5px solid currentColor;padding-bottom:.25cqw">Section 1</div>
+      <h1 class="abs h" style="left:18.1%;top:31.4%;font-size:7.8cqw;line-height:.9;color:var(--ink)">Fresh has<br>a wild side.</h1>
+      <p class="abs p" style="left:18.6%;top:57.8%;width:33.4%">Sun-ripened tomatoes, wild basil and flour milled the old way. Our pizza starts in the garden.</p>
+      <a href="#" data-go="68" class="abs btn solid" style="left:18.6%;top:70.5%;width:13.6%;height:5%">Learn more</a>
+      <button class="abs circ" style="left:3.7%;top:51%" aria-label="Previous">‹</button>
+      <button class="abs circ" style="left:95.8%;top:50.2%" aria-label="Next" data-go="68">›</button>
+      <div class="abs hdots" style="left:49.7%;top:90.2%"><i class="on" data-go="0"></i><i data-go="68"></i><i data-go="150"></i><i data-go="232"></i></div>
+    </div>
+    <!-- 2. it all comes together -->
+    <div class="grp" id="g2">
+      <div class="abs label" style="left:14.6%;top:17.6%;color:var(--red)">Section 2.</div>
+      <h2 class="abs h" style="left:14.5%;top:21.2%;font-size:5.95cqw;line-height:.92;color:var(--red)">It all comes<br>together.</h2>
+      <p class="abs p" style="left:14.75%;top:43.6%;width:27.5%">The tastiest sauce starts simple: ripe tomatoes crushed by hand, fresh basil and olive oil.</p>
+      <a href="#" data-go="150" class="abs btn line" style="left:14.75%;top:55.8%;width:12.4%;height:5%">Read more</a>
+      <button class="abs circ" style="left:95.9%;top:50%" aria-label="Next" data-go="150">›</button>
+    </div>
+    <!-- 3. wildly good pizza -->
+    <div class="grp" id="g3">
+      <div class="abs pill" style="left:50.3%;top:12.6%;width:17.4%;height:4.4%">HANDMADE DAILY</div>
+      <h2 class="abs h final-h" style="left:50%;top:17.3%;font-size:7.9cqw;line-height:1.05">Wildly good pizza</h2>
+      <p class="abs final-p" style="left:50%;top:80.4%;width:42%">Wood-fired in 90 seconds and topped with fresh mozzarella. <a href="#" data-go="232">Pick your pizza.</a></p>
+      <a href="#" data-go="232" class="abs btn cream" style="left:50%;top:87.6%;width:24.1%;height:5.6%">PICK YOUR FAVOURITE</a>
+    </div>
+
+    <!-- NAV -->
+    <div class="abs navbg" id="navbg"></div>
+    <a href="#" data-go="0" class="abs logo">Wilda</a>
+    <nav class="abs nav">
+      <a href="#" class="on" data-go="0" data-sec="0" style="left:37.7%">Home</a>
+      <a href="#" data-go="68" data-sec="1" style="left:44.3%">About</a>
+      <a href="#" data-go="232" data-sec="3" style="left:51.2%">Pizzas</a>
+      <a href="#" data-go="150" data-sec="2" style="left:57.6%">Blog</a>
+      <a href="#" data-go="232" style="left:64.4%">Support</a>
+      <a href="#" data-go="232" style="left:72.3%">Contact</a>
+    </nav>
+    <button class="abs search" aria-label="Search"><svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg></button>
+    <a href="#" data-go="232" class="abs signin">Sign In</a>
+    <button class="abs burger" data-open-menu aria-label="Open menu"><span></span><span></span><span></span></button>
+    <button class="abs chat" aria-label="Chat with us"><svg width="45%" height="45%" viewBox="0 0 24 24" fill="none" stroke="#f4ecdc" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const N = 233;
+  const src = i => 'frames/' + String(i).padStart(3, '0') + '.webp';
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* frames: coarse-to-fine loading, limited concurrency */
+  const imgs = new Array(N).fill(null), bmps = new Map(), order = [];
+  { const seen = new Set(); for (const step of [24, 8, 4, 2, 1]) for (let i = 0; i < N; i += step) if (!seen.has(i)) { seen.add(i); order.push(i); }
+    if (!seen.has(N - 1)) order.splice(1, 0, N - 1); }
+  let loaded = 0, qi = 0, active = 0, ready = false, dirty = true;
+  const lbar = document.getElementById('lbar'), lpc = document.getElementById('lpc'), loader = document.getElementById('loader');
+  function pump() {
+    while (active < 6 && qi < order.length) {
+      const i = order[qi++]; active++;
+      const im = new Image(); im.decoding = 'async'; im.src = src(i);
+      const done = () => { active--; loaded++; progress(); pump(); };
+      im.decode().then(() => { imgs[i] = im; dirty = true; done(); }).catch(() => { im.onload = () => { imgs[i] = im; dirty = true; }; done(); });
+    }
+  }
+  function progress() {
+    const p = Math.min(1, loaded / 40);
+    lbar.style.width = (p * 100).toFixed(0) + '%'; lpc.textContent = Math.round(p * 100) + '%';
+    if (!ready && p >= 1) { ready = true; loader.classList.add('done'); }
+  }
+  setTimeout(() => { if (!ready) { ready = true; loader.classList.add('done'); } }, 6000);
+  pump();
+  const nearest = i => { for (let d = 0; d < N; d++) { if (imgs[i - d]) return i - d; if (imgs[i + d]) return i + d; } return -1; };
+  let bmpBusy = 0;
+  function warm(c) {
+    if (typeof createImageBitmap !== 'function') return;
+    const lo = Math.floor(c) - 10, hi = Math.ceil(c) + 14;
+    for (const k of [...bmps.keys()]) if (k < lo - 12 || k > hi + 12) { const b = bmps.get(k); bmps.delete(k); b && b.close && b.close(); }
+    for (let i = Math.max(0, lo); i <= Math.min(N - 1, hi) && bmpBusy < 3; i++) {
+      if (bmps.has(i) || !imgs[i]) continue;
+      bmps.set(i, null); bmpBusy++;
+      createImageBitmap(imgs[i]).then(b => { bmps.set(i, b); bmpBusy--; }).catch(() => { bmps.delete(i); bmpBusy--; });
+    }
+  }
+  const usable = i => bmps.get(i) || imgs[i];
+  function paint(ctx, f, sx, sy, sw, sh, W, H) {
+    const a = Math.floor(f), b = Math.min(N - 1, a + 1), t = f - a;
+    const ia = usable(a) ? a : nearest(a); if (ia < 0) return false;
+    ctx.globalAlpha = 1; ctx.drawImage(usable(ia), sx, sy, sw, sh, 0, 0, W, H);
+    if (t > 0.02 && ia === a && usable(b)) { ctx.globalAlpha = t; ctx.drawImage(usable(b), sx, sy, sw, sh, 0, 0, W, H); ctx.globalAlpha = 1; }
+    return true;
+  }
+  const dims = () => { const i = nearest(0); const im = imgs[i]; return im ? [im.naturalWidth, im.naturalHeight] : [1440, 900]; };
+  function sizeCanvas(c, w, h) {
+    const [IW] = dims(), dpr = Math.min(devicePixelRatio || 1, 2), k = Math.min(dpr, Math.max(1, IW * 1.25 / w));
+    const W = Math.round(w * k), H = Math.round(h * k), key = W + 'x' + H;
+    if (key !== c._k) { c.width = W; c.height = H; c._k = key; const x = c.getContext('2d'); x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high'; return true; }
+    return false;
+  }
+  // colour of a horizontal line of the painted canvas (used to tint nav bar / phone panel to the scene)
+  function rowColor(ctx, c, y) {
+    try { const d = ctx.getImageData(Math.round(c.width * .04), Math.round(y), Math.round(c.width * .92), 1).data; let r = 0, g = 0, b = 0, n = 0;
+      for (let i = 0; i < d.length; i += 16) { r += d[i]; g += d[i + 1]; b += d[i + 2]; n++; } return [r / n, g / n, b / n]; } catch (e) { return null; }
+  }
+  const css = c => `rgb(${c[0] | 0},${c[1] | 0},${c[2] | 0})`;
+  const lum = c => (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) / 255;
+
+  /* measured top of each heading (fraction of screen height) per video frame */
+  const HERO = [[0,.335],[20,.331],[24,.285],[28,.206],[32,.10],[36,-.011],[40,-.074],[44,-.174],[50,-.40],[60,-1.2]];
+  const SEC2 = [[0,2.2],[28,1.2],[30,1.13],[36,.92],[40,.78],[44,.64],[48,.499],[52,.347],[56,.267],[60,.235],[64,.225],[76,.221],[80,.186],[84,.108],
+                [88,.048],[92,.015],[96,-.001],[104,-.01],[112,-.021],[118,-.032],[120,-.059],[124,-.5],[130,-1.2]];
+  const FINAL = [[0,2.2],[160,1.6],[166,1.15],[172,.90],[176,.75],[180,.579],[184,.521],[188,.503],[196,.502],[200,.468],[204,.322],[208,.208],
+                 [212,.182],[216,.173],[220,.17],[232,.17]];
+  const kf = (K, f) => { if (f <= K[0][0]) return K[0][1]; for (let k = 0; k < K.length - 1; k++) { const [a, va] = K[k], [b, vb] = K[k + 1];
+    if (f <= b) return va + (vb - va) * (f - a) / (b - a); } return K[K.length - 1][1]; };
+  const secOf = f => f < 36 ? 0 : f < 128 ? 1 : f < 170 ? 2 : 3;
+
+  let cur = 0, target = 0, lastF = -1;
+
+  /* desktop */
+  const cv = document.getElementById('cv'), ctx = cv.getContext('2d', { alpha: false, willReadFrequently: false });
+  const space = document.getElementById('space'), g1 = document.getElementById('g1'), g2 = document.getElementById('g2'), g3 = document.getElementById('g3');
+  const navbg = document.getElementById('navbg'), navLinks = [...document.querySelectorAll('.nav a[data-sec]')], hdots = [...document.querySelectorAll('.hdots i')];
+  let navTick = 0;
+  function drawDesktop(f) {
+    const changed = sizeCanvas(cv, cv.clientWidth, cv.clientHeight);
+    if (changed || dirty || Math.abs(f - lastF) > 0.003) {
+      const [IW, IH] = dims(); paint(ctx, f, 0, 0, IW, IH, cv.width, cv.height);
+      if (++navTick % 3 === 0 || changed) {        // nav bar follows the scene colour; turns cream over the dark green oven
+        const c = rowColor(ctx, cv, cv.height * 0.10);
+        if (c) navbg.style.background = lum(c) > .62 ? css(c) : 'var(--cream)';
+      }
+    }
+    const H = space.clientHeight;
+    g1.style.transform = `translate3d(0,${((kf(HERO, f) - .335) * H).toFixed(2)}px,0)`;
+    g2.style.transform = `translate3d(0,${((kf(SEC2, f) - .225) * H).toFixed(2)}px,0)`;
+    g3.style.transform = `translate3d(0,${((kf(FINAL, f) - .17) * H).toFixed(2)}px,0)`;
+    const s = secOf(f);
+    navLinks.forEach(a => a.classList.toggle('on', +a.dataset.sec === s));
+    hdots.forEach((d, k) => d.classList.toggle('on', k === s));
+  }
+
+  /* phone */
+  const mq = matchMedia('(max-width:760px), (max-aspect-ratio:4/5)');
+  const mcv = document.getElementById('mcv'), mctx = mcv.getContext('2d', { alpha: false });
+  const msecs = [...document.querySelectorAll('.m-sec')], mroot = document.getElementById('m');
+  let mSec = -1, mTick = 0;
+  const PANEL = ['#f3d7c0', '#efe5d3', '#1f4435'];
+  const CX = [[0,.60],[30,.60],[44,.52],[232,.52]];
+  function drawMobile(f) {
+    const w = mcv.clientWidth, h = mcv.clientHeight, changed = sizeCanvas(mcv, w, h);
+    const [IW, IH] = dims(), ca = mcv.width / mcv.height;
+    let sh = IH * 0.90, sw = sh * ca; if (sw > IW) { sw = IW; sh = sw / ca; }
+    const sx = clamp(kf(CX, f) * IW - sw / 2, 0, IW - sw), sy = clamp(IH * 0.09, 0, IH - sh);
+    if (changed || dirty || Math.abs(f - lastF) > 0.003) {
+      paint(mctx, f, sx, sy, sw, sh, mcv.width, mcv.height);
+      if (++mTick % 3 === 0 || changed) {            // header follows the light scene colour (pink -> cream), cream otherwise
+        const top = rowColor(mctx, mcv, 2);
+        const okc = top && lum(top) > .78 && Math.max(...top) - Math.min(...top) < 70;
+        mroot.style.setProperty('--mbar', okc ? css(top) : 'var(--cream)');
+      }
+    }
+    const sec = f < 36 ? 0 : f < 128 ? 1 : 2;
+    if (sec !== mSec) {
+      msecs.forEach((el, k) => el.classList.toggle('on', k === sec)); mSec = sec;
+      mroot.style.setProperty('--mpanel', PANEL[sec]); mroot.style.background = PANEL[sec];
+    }
+  }
+
+  /* loop */
+  const maxScroll = () => Math.max(1, document.documentElement.scrollHeight - innerHeight);
+  function onScroll() { target = clamp(scrollY / maxScroll(), 0, 1) * (N - 1); wake(); }
+  let raf = 0, last = 0;
+  function frame(now) {
+    raf = 0;
+    const dt = Math.min(64, now - (last || now)); last = now;
+    cur += (target - cur) * (reduce ? 1 : 1 - Math.exp(-dt / 85));
+    if (Math.abs(target - cur) < 0.004) cur = target;
+    warm(cur);
+    (mq.matches ? drawMobile : drawDesktop)(cur);
+    lastF = cur; dirty = false;
+    if (cur !== target || bmpBusy || active) wake(); else last = 0;
+  }
+  function wake() { if (!raf) raf = requestAnimationFrame(frame); }
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', () => { dirty = true; onScroll(); });
+  mq.addEventListener && mq.addEventListener('change', () => { dirty = true; mSec = -1; wake(); });
+  setInterval(() => { if (dirty) wake(); }, 120);
+  onScroll();
+
+  /* navigation */
+  const goFrame = f => scrollTo({ top: f / (N - 1) * maxScroll(), behavior: reduce ? 'auto' : 'smooth' });
+  const menu = document.getElementById('menu');
+  const openMenu = () => { menu.classList.add('open'); menu.setAttribute('aria-hidden', 'false'); };
+  const closeMenu = () => { menu.classList.remove('open'); menu.setAttribute('aria-hidden', 'true'); };
+  document.querySelectorAll('[data-open-menu]').forEach(b => b.addEventListener('click', openMenu));
+  document.getElementById('mclose').addEventListener('click', closeMenu);
+  addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+  document.addEventListener('click', e => {
+    const el = e.target.closest('[data-go]');
+    if (el) { e.preventDefault(); closeMenu(); goFrame(+el.dataset.go); return; }
+    const a = e.target.closest('a[href="#"]'); if (a) e.preventDefault();
+  });
+})();
+</script>
+</body>
+</html>
