@@ -223,7 +223,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
 <script>
 (() => {
   const N = 233;                 // logical timeline (video frames)
-  const NI = 463;                // images on disk (motion-interpolated 2x)
+  const NI = 463;                // images on disk (RIFE-interpolated)
   const toI = f => f * (NI - 1) / (N - 1);
   const src = i => 'frames/' + String(i).padStart(3, '0') + '.webp';
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -263,19 +263,94 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
     }
   }
   const usable = i => bmps.get(i) || imgs[i];
-  function paint(ctx, f, sx, sy, sw, sh, W, H) {
-    f = Math.round(toI(f));                       // always a single sharp frame (no ghosting cross-fade)
-    const a = f, b = a, t = 0;
-    const ia = usable(a) ? a : nearest(a); if (ia < 0) return false;
-    ctx.globalAlpha = 1; ctx.drawImage(usable(ia), sx, sy, sw, sh, 0, 0, W, H);
-    if (t > 0.02 && ia === a && usable(b)) { ctx.globalAlpha = t; ctx.drawImage(usable(b), sx, sy, sw, sh, 0, 0, W, H); ctx.globalAlpha = 1; }
+  /* ---------------- WebGL renderer with depth parallax (2.5D) ---------------- */
+  // each video frame has a Depth-Anything depth map; pixels are displaced by (depth - focus) * offset,
+  // so near objects move more than the background when the mouse moves (desktop) or while scrolling (phone).
+  const DEPTH_TILES = 16, DEPTH_COLS = 4;
+  const depthAtlas = [];
+  for (let a = 0; a < Math.ceil(N / DEPTH_TILES); a++) {
+    const im = new Image(); im.decoding = 'async'; im.src = 'depth/' + String(a).padStart(2, '0') + '.webp';
+    im.onload = () => { im._ok = true; dirty = true; wake && wake(); }; depthAtlas.push(im);
+  }
+  const FOCUS = 0.32;                   // depth that stays still (the background wall sits just behind it)
+  function makePainter(canvas) {
+    let gl = null;
+    try { gl = canvas.getContext('webgl', { alpha: false, antialias: false, premultipliedAlpha: false, powerPreference: 'high-performance' }); } catch (e) {}
+    if (!gl) { const ctx = canvas.getContext('2d', { alpha: false }); ctx.imageSmoothingQuality = 'high'; return { ctx }; }
+    const sh = (t, s) => { const o = gl.createShader(t); gl.shaderSource(o, s); gl.compileShader(o); return o; };
+    const pr = gl.createProgram();
+    gl.attachShader(pr, sh(gl.VERTEX_SHADER, 'attribute vec2 p;varying vec2 v;void main(){v=vec2(p.x*.5+.5,.5-p.y*.5);gl_Position=vec4(p,0.,1.);}'));
+    gl.attachShader(pr, sh(gl.FRAGMENT_SHADER,
+      'precision highp float;varying vec2 v;uniform sampler2D img,dep;uniform vec4 crop,tile;uniform vec2 off;uniform float focus,hasD;' +
+      'void main(){vec2 uv=crop.xy+v*crop.zw;' +
+      'float d=hasD>.5?texture2D(dep,tile.xy+clamp(uv,.004,.996)*tile.zw).r:focus;' +
+      'vec2 u=uv-off*(d-focus);gl_FragColor=texture2D(img,clamp(u,vec2(0.),vec2(1.)));}'));
+    gl.linkProgram(pr); gl.useProgram(pr);
+    const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    const tex = unit => { const t = gl.createTexture(); gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, t);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); return t; };
+    const timg = tex(0), tdep = tex(1);
+    gl.uniform1i(gl.getUniformLocation(pr, 'img'), 0); gl.uniform1i(gl.getUniformLocation(pr, 'dep'), 1);
+    const U = n => gl.getUniformLocation(pr, n);
+    const uCrop = U('crop'), uTile = U('tile'), uOff = U('off'), uFocus = U('focus'), uHasD = U('hasD');
+    let lastImg = null, lastAtlas = null;
+    return {
+      gl,
+      draw(img, crop, orig, off) {
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        if (img !== lastImg) { gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, timg); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img); lastImg = img; }
+        const at = depthAtlas[Math.floor(orig / DEPTH_TILES)], ok = at && at._ok;
+        if (ok && at !== lastAtlas) { gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, tdep); gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, gl.LUMINANCE, gl.UNSIGNED_BYTE, at); lastAtlas = at; }
+        const t = orig % DEPTH_TILES, rows = DEPTH_TILES / DEPTH_COLS;
+        gl.uniform4f(uCrop, crop[0], crop[1], crop[2], crop[3]);
+        gl.uniform4f(uTile, (t % DEPTH_COLS) / DEPTH_COLS, Math.floor(t / DEPTH_COLS) / rows, 1 / DEPTH_COLS, 1 / rows);
+        gl.uniform2f(uOff, off[0], off[1]); gl.uniform1f(uFocus, FOCUS); gl.uniform1f(uHasD, ok ? 1 : 0);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      }
+    };
+  }
+  // average colour of one row of the current image (to tint the nav bar / phone header like the scene)
+  const probe = document.createElement('canvas'); probe.width = 96; probe.height = 60;
+  const pctx = probe.getContext('2d', { willReadFrequently: true });
+  function rowColorImg(img, crop, fy) {
+    if (!img) return null;
+    try { const W = img.naturalWidth || img.width, H = img.naturalHeight || img.height;
+      pctx.drawImage(img, crop[0] * W, crop[1] * H, crop[2] * W, crop[3] * H, 0, 0, 96, 60);
+      const d = pctx.getImageData(4, Math.min(59, Math.round(fy * 60)), 88, 1).data; let r = 0, g = 0, b = 0, n = 0;
+      for (let i = 0; i < d.length; i += 4) { r += d[i]; g += d[i + 1]; b += d[i + 2]; n++; } return [r / n, g / n, b / n]; } catch (e) { return null; }
+  }
+  // parallax input: mouse on desktop (smoothed), scroll velocity on phones
+  const PAR = { mx: 0, my: 0, tx: 0, ty: 0, vel: 0, off: [0, 0], moving: false };
+  const OFF_MAX = 0.011;                // subtle: ~8px for near objects on a 1600px screen
+  addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return;
+    PAR.tx = (e.clientX / innerWidth - .5) * 2; PAR.ty = (e.clientY / innerHeight - .5) * 2; wake(); }, { passive: true });
+  document.addEventListener('mouseleave', () => { PAR.tx = PAR.ty = 0; wake(); });
+  function updateParallax(dt, phone, dFrame) {
+    if (reduce) { PAR.off = [0, 0]; PAR.moving = false; return; }
+    const k = 1 - Math.exp(-dt / 140);
+    if (phone) { PAR.tx = 0; PAR.ty = clamp(-dFrame * 0.9, -1, 1); }
+    PAR.mx += (PAR.tx - PAR.mx) * k; PAR.my += (PAR.ty - PAR.my) * k;
+    const nx = PAR.mx * OFF_MAX, ny = PAR.my * OFF_MAX * 0.7;
+    PAR.moving = Math.abs(PAR.tx - PAR.mx) + Math.abs(PAR.ty - PAR.my) > 0.002;
+    PAR.changed = Math.abs(nx - PAR.off[0]) + Math.abs(ny - PAR.off[1]) > 1e-5;
+    PAR.off = [nx, ny];
+  }
+  // pixel shift of a layer living at depth d (for the HTML text / foreground canvas)
+  const layerShift = (d, w, h) => [PAR.off[0] * (d - FOCUS) * w, PAR.off[1] * (d - FOCUS) * h];
+  function paint(P, f, sx, sy, sw, sh, W, H) {
+    const fi = Math.round(toI(f)); const ia = usable(fi) ? fi : nearest(fi); if (ia < 0) return false;
+    const img = usable(ia), [IW, IH] = dims(); P.last = img; P.crop = [sx / IW, sy / IH, sw / IW, sh / IH];
+    if (P.gl) P.draw(img, P.crop, Math.round(ia * (N - 1) / (NI - 1)), PAR.off); else P.ctx.drawImage(img, sx, sy, sw, sh, 0, 0, W, H);
     return true;
   }
-  const dims = () => { const i = nearest(0); const im = imgs[i]; return im ? [im.naturalWidth, im.naturalHeight] : [1440, 900]; };
+  const dims = () => { const i = nearest(0); const im = imgs[i]; return im ? [im.naturalWidth, im.naturalHeight] : [1920, 1200]; };
   function sizeCanvas(c, w, h) {
     const [IW] = dims(), dpr = Math.min(devicePixelRatio || 1, 2), k = Math.min(dpr, Math.max(1, IW * 1.25 / w));
     const W = Math.round(w * k), H = Math.round(h * k), key = W + 'x' + H;
-    if (key !== c._k) { c.width = W; c.height = H; c._k = key; const x = c.getContext('2d'); x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high'; return true; }
+    if (key !== c._k) { c.width = W; c.height = H; c._k = key; return true; }
     return false;
   }
   // colour of a horizontal line of the painted canvas (used to tint nav bar / phone panel to the scene)
@@ -299,24 +374,25 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
   let cur = 0, target = 0, lastF = -1;
 
   /* desktop */
-  const cv = document.getElementById('cv'), ctx = cv.getContext('2d', { alpha: false, willReadFrequently: false });
+  const cv = document.getElementById('cv'), ctx = makePainter(cv);
   const space = document.getElementById('space'), g1 = document.getElementById('g1'), g2 = document.getElementById('g2'), g3 = document.getElementById('g3');
   const chat = document.getElementById('chat'), fcv = document.getElementById('fcv'), fctx = fcv.getContext('2d');
   const navbg = document.getElementById('navbg'), navLinks = [...document.querySelectorAll('.nav a[data-sec]')], hdots = [...document.querySelectorAll('.hdots i')];
   let navTick = 0;
   function drawDesktop(f) {
     const changed = sizeCanvas(cv, cv.clientWidth, cv.clientHeight);
-    if (changed || dirty || Math.abs(f - lastF) > 0.003) {
+    if (changed || dirty || PAR.changed || Math.abs(f - lastF) > 0.003) {
       const [IW, IH] = dims(); paint(ctx, f, 0, 0, IW, IH, cv.width, cv.height);
       if (++navTick % 3 === 0 || changed) {        // nav bar follows the scene colour; turns cream over the dark green oven
-        const c = rowColor(ctx, cv, cv.height * 0.10);
+        const c = rowColorImg(ctx.last, ctx.crop, 0.10);
         if (c) navbg.style.background = lum(c) > .62 ? css(c) : 'var(--cream)';
       }
     }
-    const H = space.clientHeight;
-    g1.style.transform = `translate3d(0,${((kf(HERO, f) - .335) * H).toFixed(2)}px,0)`;
-    g2.style.transform = `translate3d(0,${((kf(SEC2, f) - .225) * H).toFixed(2)}px,0)`;
-    g3.style.transform = `translate3d(0,${((kf(FINAL, f) - .17) * H).toFixed(2)}px,0)`;
+    const H = space.clientHeight, [tx, ty] = layerShift(0.62, cv.clientWidth, cv.clientHeight), [fx, fy] = layerShift(0.8, cv.clientWidth, cv.clientHeight);
+    g1.style.transform = `translate3d(${tx.toFixed(2)}px,${((kf(HERO, f) - .335) * H + ty).toFixed(2)}px,0)`;
+    g2.style.transform = `translate3d(${tx.toFixed(2)}px,${((kf(SEC2, f) - .225) * H + ty).toFixed(2)}px,0)`;
+    g3.style.transform = `translate3d(${tx.toFixed(2)}px,${((kf(FINAL, f) - .17) * H + ty).toFixed(2)}px,0)`;
+    fcv.style.transform = `translate3d(${fx.toFixed(2)}px,${fy.toFixed(2)}px,0)`;
     const s = secOf(f);
     hdots.forEach((d, k) => d.classList.toggle('on', k === s));
     chat.classList.toggle('out', f >= 176);
@@ -348,7 +424,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
 
   /* phone */
   const mq = matchMedia('(max-width:760px), (max-aspect-ratio:4/5)');
-  const mcv = document.getElementById('mcv'), mctx = mcv.getContext('2d', { alpha: false });
+  const mcv = document.getElementById('mcv'), mctx = makePainter(mcv);
   const msecs = [...document.querySelectorAll('.m-sec')], mroot = document.getElementById('m');
   let mSec = -1, mTick = 0;
   const PANEL = ['#f3d7c0', '#efe5d3', '#1f4435'];
@@ -358,10 +434,10 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
     const [IW, IH] = dims(), ca = mcv.width / mcv.height;
     let sh = IH * 0.90, sw = sh * ca; if (sw > IW) { sw = IW; sh = sw / ca; }
     const sx = clamp(kf(CX, f) * IW - sw / 2, 0, IW - sw), sy = clamp(IH * 0.09, 0, IH - sh);
-    if (changed || dirty || Math.abs(f - lastF) > 0.003) {
+    if (changed || dirty || PAR.changed || Math.abs(f - lastF) > 0.003) {
       paint(mctx, f, sx, sy, sw, sh, mcv.width, mcv.height);
       if (++mTick % 3 === 0 || changed) {            // header follows the light scene colour (pink -> cream), cream otherwise
-        const top = rowColor(mctx, mcv, 2);
+        const top = rowColorImg(mctx.last, mctx.crop, 0.004);
         const okc = top && lum(top) > .78 && Math.max(...top) - Math.min(...top) < 70;
         mroot.style.setProperty('--mbar', okc ? css(top) : 'var(--cream)');
       }
@@ -380,12 +456,14 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
   function frame(now) {
     raf = 0;
     const dt = Math.min(64, now - (last || now)); last = now;
+    const prevCur = cur;
     cur += (target - cur) * (reduce ? 1 : 1 - Math.exp(-dt / 70));
     if (Math.abs(target - cur) < 0.004) cur = target;
+    updateParallax(dt || 16, mq.matches, cur - prevCur);
     warm(cur);
     (mq.matches ? drawMobile : drawDesktop)(cur);
     lastF = cur; dirty = false;
-    if (cur !== target || bmpBusy || active) wake(); else last = 0;
+    if (cur !== target || bmpBusy || active || PAR.moving) wake(); else last = 0;
   }
   function wake() { if (!raf) raf = requestAnimationFrame(frame); }
   addEventListener('scroll', onScroll, { passive: true });
