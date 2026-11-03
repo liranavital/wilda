@@ -24,7 +24,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:var(--pink);color:var(--ink);color-scheme:light}
 body{font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
-#scroller{height:900vh}
+#scroller{height:660vh}
 
 /* 16:10 stage that covers the viewport (anchored top) */
 #stage{position:fixed;left:50%;top:0;transform:translateX(-50%);width:max(100vw,160vh);aspect-ratio:16/10;overflow:hidden;background:var(--pink)}
@@ -33,6 +33,7 @@ body{font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidde
 #space{position:absolute;left:-1.2268%;top:-1.227%;width:103.093%;height:102.249%;container-type:size}
 .abs{position:absolute}
 .grp{position:absolute;left:0;top:0;width:100%;height:100%;will-change:transform}
+#fcv{position:absolute;left:1.19%;top:1.2%;width:97%;height:97.8%;pointer-events:none}
 
 /* NAV */
 .navbg{left:0;top:0;width:100%;height:9.4%;background:var(--pink);border-bottom:1px solid rgba(46,70,48,.08)}
@@ -67,7 +68,8 @@ body{font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidde
 .final-p a{color:inherit}
 .btn.cream{background:#efe6d2;color:var(--green);letter-spacing:.12em;font-weight:700;font-size:1.08cqw;transform:translateX(-50%)}
 .btn.cream:hover{transform:translateX(-50%) translateY(-1px);background:#fff8ea}
-.chat{left:95.3%;top:94.3%;width:4.3cqw;height:4.3cqw;border-radius:50%;background:var(--leaf);border:1.5px solid rgba(239,233,214,.35);transform:translate(-50%,-50%);
+.chat.out{background:transparent;border-color:transparent}
+.chat{transition:background-color .3s,border-color .3s;left:95.3%;top:94.3%;width:4.3cqw;height:4.3cqw;border-radius:50%;background:var(--leaf);border:1.5px solid rgba(239,233,214,.35);transform:translate(-50%,-50%);
   display:flex;align-items:center;justify-content:center;cursor:pointer}
 
 /* shared overlay menu */
@@ -94,7 +96,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
 #m{display:none}
 @media (max-width:760px), (max-aspect-ratio:4/5){
   #stage{display:none}
-  #scroller{height:800vh}
+  #scroller{height:600vh}
   #m{display:block;position:fixed;inset:0;overflow:hidden;background:var(--pink)}
   #mcv{position:absolute;left:0;top:0;width:100%;height:64%;display:block}
   .m-top{position:absolute;left:0;right:0;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:10px;
@@ -176,7 +178,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
     <div class="grp" id="g1">
       <div class="abs label" style="left:18.3%;top:26.4%;color:var(--label);border-bottom:1.5px solid currentColor;padding-bottom:.25cqw">Section 1</div>
       <h1 class="abs h" style="left:18.1%;top:31.4%;font-size:7.8cqw;line-height:.9;color:var(--ink)">Fresh has<br>a wild side.</h1>
-      <p class="abs p" style="left:18.6%;top:57.8%;width:33.4%">Sun-ripened tomatoes, wild basil and flour milled the old way. Our pizza starts in the garden.</p>
+      <p class="abs p" style="left:18.6%;top:57.8%;width:33.4%">Sun-ripened tomatoes, wild basil and flour milled the old way. Every Wilda pizza starts in the garden and ends in the fire.</p>
       <a href="#" data-go="68" class="abs btn solid" style="left:18.6%;top:70.5%;width:13.6%;height:5%">Learn more</a>
       <button class="abs circ" style="left:3.7%;top:51%" aria-label="Previous" data-go="0">‹</button>
       <button class="abs circ" style="left:95.8%;top:50.2%" aria-label="Next" data-go="68">›</button>
@@ -198,6 +200,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
       <a href="#" data-go="232" class="abs btn cream" style="left:50%;top:87.6%;width:24.1%;height:5.6%">PICK YOUR FAVOURITE</a>
     </div>
 
+    <!-- objects that pass in front of the text -->
+    <canvas id="fcv"></canvas>
     <!-- NAV -->
     <div class="abs navbg" id="navbg"></div>
     <a href="#" data-go="0" class="abs logo">Wilda</a>
@@ -212,7 +216,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
     <button class="abs search" aria-label="Search"><svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg></button>
     <a href="#" data-go="232" class="abs signin">Sign In</a>
     <button class="abs burger" data-open-menu aria-label="Open menu"><span></span><span></span><span></span></button>
-    <button class="abs chat" data-open-menu aria-label="Contact us"><svg width="45%" height="45%" viewBox="0 0 24 24" fill="none" stroke="#f4ecdc" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></button>
+    <button class="abs chat" id="chat" data-open-menu aria-label="Contact us"><svg width="45%" height="45%" viewBox="0 0 24 24" fill="none" stroke="#f4ecdc" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></button>
   </div>
 </div>
 
@@ -283,11 +287,11 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
   const lum = c => (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) / 255;
 
   /* measured top of each heading (fraction of screen height) per video frame */
-  const HERO = [[0,.335],[20,.331],[24,.285],[28,.206],[32,.10],[36,-.011],[40,-.074],[44,-.174],[50,-.40],[60,-1.2]];
-  const SEC2 = [[0,2.2],[28,1.2],[30,1.13],[36,.92],[40,.78],[44,.64],[48,.499],[52,.347],[56,.267],[60,.235],[64,.225],[76,.221],[80,.186],[84,.108],
-                [88,.048],[92,.015],[96,-.001],[104,-.01],[112,-.021],[118,-.032],[120,-.059],[124,-.5],[130,-1.2]];
-  const FINAL = [[0,2.2],[160,1.6],[166,1.15],[172,.90],[176,.75],[180,.579],[184,.521],[188,.503],[196,.502],[200,.468],[204,.322],[208,.208],
-                 [212,.182],[216,.173],[220,.17],[232,.17]];
+  const HERO = [[0,.335],[20,.33],[22,.314],[24,.284],[26,.246],[28,.204],[30,.159],[32,.098],[34,.037],[36,-.014],[38,-.045],[40,-.074],[44,-.174],[50,-.40],[60,-1.2]];
+  const SEC2 = [[0,2.2],[26,1.1],[30,.99],[34,.92],[36,.877],[38,.841],[40,.814],[42,.776],[44,.715],[46,.593],[48,.498],[50,.412],[52,.346],[54,.299],
+                [56,.267],[58,.247],[60,.235],[64,.225],[76,.221],[80,.186],[84,.108],[88,.048],[92,.015],[96,-.001],[104,-.01],[112,-.021],[118,-.032],[120,-.059],[124,-.5],[130,-1.2]];
+  const FINAL = [[0,2.2],[160,1.6],[168,.95],[172,.80],[174,.74],[176,.692],[178,.628],[180,.579],[182,.544],[184,.522],[186,.509],[188,.504],[198,.498],
+                 [200,.469],[202,.405],[204,.322],[206,.248],[208,.208],[210,.192],[212,.183],[216,.173],[220,.17],[232,.17]];
   const kf = (K, f) => { if (f <= K[0][0]) return K[0][1]; for (let k = 0; k < K.length - 1; k++) { const [a, va] = K[k], [b, vb] = K[k + 1];
     if (f <= b) return va + (vb - va) * (f - a) / (b - a); } return K[K.length - 1][1]; };
   const secOf = f => f < 36 ? 0 : f < 128 ? 1 : f < 170 ? 2 : 3;
@@ -297,6 +301,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
   /* desktop */
   const cv = document.getElementById('cv'), ctx = cv.getContext('2d', { alpha: false, willReadFrequently: false });
   const space = document.getElementById('space'), g1 = document.getElementById('g1'), g2 = document.getElementById('g2'), g3 = document.getElementById('g3');
+  const chat = document.getElementById('chat'), fcv = document.getElementById('fcv'), fctx = fcv.getContext('2d');
   const navbg = document.getElementById('navbg'), navLinks = [...document.querySelectorAll('.nav a[data-sec]')], hdots = [...document.querySelectorAll('.hdots i')];
   let navTick = 0;
   function drawDesktop(f) {
@@ -313,8 +318,31 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
     g2.style.transform = `translate3d(0,${((kf(SEC2, f) - .225) * H).toFixed(2)}px,0)`;
     g3.style.transform = `translate3d(0,${((kf(FINAL, f) - .17) * H).toFixed(2)}px,0)`;
     const s = secOf(f);
-    navLinks.forEach(a => a.classList.toggle('on', +a.dataset.sec === s));
     hdots.forEach((d, k) => d.classList.toggle('on', k === s));
+    chat.classList.toggle('out', f >= 176);
+    drawFg(f);
+  }
+
+  /* foreground objects (vine, tomato, pizza...) drawn above the text, like in the original */
+  const FG = {};
+  const fgImg = {};
+  function fgLoad(i) { if (!FG[i] || fgImg[i]) return; const im = new Image(); im.decoding = 'async'; im.src = 'fg/' + String(i).padStart(3, '0') + '.webp';
+    fgImg[i] = im; im.onload = () => { im._ok = true; dirty = true; wake(); }; }
+  function fgWarm(fi) { for (let i = Math.max(0, Math.floor(fi) - 20); i <= Math.min(NI - 1, Math.ceil(fi) + 30); i++) fgLoad(i); }
+  let fgAll = false;
+  function fgBackground() { if (fgAll || active) return; fgAll = true; let k = 0; const ids = Object.keys(FG).map(Number);
+    const step = () => { for (let n = 0; n < 6 && k < ids.length; n++, k++) fgLoad(ids[k]); if (k < ids.length) setTimeout(step, 120); }; step(); }
+  let fgLast = -1;
+  function drawFg(f) {
+    const fi = toI(f); fgWarm(fi); fgBackground();
+    sizeCanvas(fcv, fcv.clientWidth, fcv.clientHeight);
+    const key = fi.toFixed(3) + fcv._k;
+    if (key === fgLast && !dirty) return; fgLast = key;
+    fctx.clearRect(0, 0, fcv.width, fcv.height);
+    const a = Math.floor(fi), b = Math.min(NI - 1, a + 1), t = fi - a, k = fcv.width / 1440;
+    const put = (i, al) => { const r = FG[i], im = fgImg[i]; if (!r || !im || !im._ok || al <= 0.01) return;
+      fctx.globalAlpha = al; fctx.drawImage(im, r[0] * k, r[1] * k, r[2] * k, r[3] * k); };
+    put(a, t > 0.02 ? 1 - t : 1); if (t > 0.02) put(b, t); fctx.globalAlpha = 1;
   }
 
   /* phone */
@@ -351,7 +379,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
   function frame(now) {
     raf = 0;
     const dt = Math.min(64, now - (last || now)); last = now;
-    cur += (target - cur) * (reduce ? 1 : 1 - Math.exp(-dt / 85));
+    cur += (target - cur) * (reduce ? 1 : 1 - Math.exp(-dt / 70));
     if (Math.abs(target - cur) < 0.004) cur = target;
     warm(cur);
     (mq.matches ? drawMobile : drawDesktop)(cur);
