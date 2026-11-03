@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#f3d7c0">
 <meta property="og:title" content="Wilda - Wildly good pizza">
 <meta property="og:description" content="Sun-ripened tomatoes, fresh basil and a wood-fired oven. Fresh has a wild side.">
-<meta property="og:image" content="frames/232.webp">
+<meta property="og:image" content="frames/462.webp">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='36' r='22' fill='%23d8432f'/%3E%3Cpath d='M32 14c-6-6-14-4-16 0 6 1 10 3 16 6 6-3 10-5 16-6-2-4-10-6-16 0z' fill='%232e5a35'/%3E%3C/svg%3E">
 <link rel="preload" as="image" href="frames/000.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -219,7 +219,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
 <script>
 (() => {
   const N = 233;                 // logical timeline (video frames)
-  const NI = 233;                // images on disk
+  const NI = 463;                // images on disk (motion-interpolated 2x)
   const toI = f => f * (NI - 1) / (N - 1);
   const src = i => 'frames/' + String(i).padStart(3, '0') + '.webp';
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
