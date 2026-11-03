@@ -165,7 +165,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
       <a href="#" data-go="232" class="btn cream m-btn">PICK YOUR FAVOURITE</a>
     </section>
   </div>
-  <button class="m-chat" aria-label="Chat with us"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f4ecdc" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></button>
+  <button class="m-chat" data-open-menu aria-label="Contact us"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f4ecdc" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></button>
 </div>
 
 <!-- DESKTOP -->
@@ -178,7 +178,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
       <h1 class="abs h" style="left:18.1%;top:31.4%;font-size:7.8cqw;line-height:.9;color:var(--ink)">Fresh has<br>a wild side.</h1>
       <p class="abs p" style="left:18.6%;top:57.8%;width:33.4%">Sun-ripened tomatoes, wild basil and flour milled the old way. Our pizza starts in the garden.</p>
       <a href="#" data-go="68" class="abs btn solid" style="left:18.6%;top:70.5%;width:13.6%;height:5%">Learn more</a>
-      <button class="abs circ" style="left:3.7%;top:51%" aria-label="Previous">‹</button>
+      <button class="abs circ" style="left:3.7%;top:51%" aria-label="Previous" data-go="0">‹</button>
       <button class="abs circ" style="left:95.8%;top:50.2%" aria-label="Next" data-go="68">›</button>
       <div class="abs hdots" style="left:49.7%;top:90.2%"><i class="on" data-go="0"></i><i data-go="68"></i><i data-go="150"></i><i data-go="232"></i></div>
     </div>
@@ -212,21 +212,23 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
     <button class="abs search" aria-label="Search"><svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg></button>
     <a href="#" data-go="232" class="abs signin">Sign In</a>
     <button class="abs burger" data-open-menu aria-label="Open menu"><span></span><span></span><span></span></button>
-    <button class="abs chat" aria-label="Chat with us"><svg width="45%" height="45%" viewBox="0 0 24 24" fill="none" stroke="#f4ecdc" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></button>
+    <button class="abs chat" data-open-menu aria-label="Contact us"><svg width="45%" height="45%" viewBox="0 0 24 24" fill="none" stroke="#f4ecdc" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg></button>
   </div>
 </div>
 
 <script>
 (() => {
-  const N = 233;
+  const N = 233;                 // logical timeline (video frames)
+  const NI = 233;                // images on disk
+  const toI = f => f * (NI - 1) / (N - 1);
   const src = i => 'frames/' + String(i).padStart(3, '0') + '.webp';
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* frames: coarse-to-fine loading, limited concurrency */
-  const imgs = new Array(N).fill(null), bmps = new Map(), order = [];
-  { const seen = new Set(); for (const step of [24, 8, 4, 2, 1]) for (let i = 0; i < N; i += step) if (!seen.has(i)) { seen.add(i); order.push(i); }
-    if (!seen.has(N - 1)) order.splice(1, 0, N - 1); }
+  const imgs = new Array(NI).fill(null), bmps = new Map(), order = [];
+  { const seen = new Set(); for (const step of [48, 16, 8, 4, 2, 1]) for (let i = 0; i < NI; i += step) if (!seen.has(i)) { seen.add(i); order.push(i); }
+    if (!seen.has(NI - 1)) order.splice(1, 0, NI - 1); }
   let loaded = 0, qi = 0, active = 0, ready = false, dirty = true;
   const lbar = document.getElementById('lbar'), lpc = document.getElementById('lpc'), loader = document.getElementById('loader');
   function pump() {
@@ -238,19 +240,19 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
     }
   }
   function progress() {
-    const p = Math.min(1, loaded / 40);
+    const p = Math.min(1, loaded / 44);
     lbar.style.width = (p * 100).toFixed(0) + '%'; lpc.textContent = Math.round(p * 100) + '%';
     if (!ready && p >= 1) { ready = true; loader.classList.add('done'); }
   }
   setTimeout(() => { if (!ready) { ready = true; loader.classList.add('done'); } }, 6000);
   pump();
-  const nearest = i => { for (let d = 0; d < N; d++) { if (imgs[i - d]) return i - d; if (imgs[i + d]) return i + d; } return -1; };
+  const nearest = i => { for (let d = 0; d < NI; d++) { if (imgs[i - d]) return i - d; if (imgs[i + d]) return i + d; } return -1; };
   let bmpBusy = 0;
   function warm(c) {
     if (typeof createImageBitmap !== 'function') return;
-    const lo = Math.floor(c) - 10, hi = Math.ceil(c) + 14;
+    c = toI(c); const lo = Math.floor(c) - 16, hi = Math.ceil(c) + 24;
     for (const k of [...bmps.keys()]) if (k < lo - 12 || k > hi + 12) { const b = bmps.get(k); bmps.delete(k); b && b.close && b.close(); }
-    for (let i = Math.max(0, lo); i <= Math.min(N - 1, hi) && bmpBusy < 3; i++) {
+    for (let i = Math.max(0, lo); i <= Math.min(NI - 1, hi) && bmpBusy < 4; i++) {
       if (bmps.has(i) || !imgs[i]) continue;
       bmps.set(i, null); bmpBusy++;
       createImageBitmap(imgs[i]).then(b => { bmps.set(i, b); bmpBusy--; }).catch(() => { bmps.delete(i); bmpBusy--; });
@@ -258,7 +260,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
   }
   const usable = i => bmps.get(i) || imgs[i];
   function paint(ctx, f, sx, sy, sw, sh, W, H) {
-    const a = Math.floor(f), b = Math.min(N - 1, a + 1), t = f - a;
+    f = toI(f);
+    const a = Math.floor(f), b = Math.min(NI - 1, a + 1), t = f - a;
     const ia = usable(a) ? a : nearest(a); if (ia < 0) return false;
     ctx.globalAlpha = 1; ctx.drawImage(usable(ia), sx, sy, sw, sh, 0, 0, W, H);
     if (t > 0.02 && ia === a && usable(b)) { ctx.globalAlpha = t; ctx.drawImage(usable(b), sx, sy, sw, sh, 0, 0, W, H); ctx.globalAlpha = 1; }
