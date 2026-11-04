@@ -125,6 +125,12 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
 }
 @media (max-width:760px) and (max-height:620px){ .m-p{display:none} }
 @media (prefers-reduced-motion:reduce){ .menu-ov,.menu-ov a,#loader,.m-sec{transition:none!important} }
+
+/* text, buttons and nav lifted straight from the video (exact letterforms); the HTML underneath stays for links & screen readers */
+.gl{position:absolute;display:block;height:auto;pointer-events:none;user-select:none}
+#g1 .p,#g2 .p,#g3 .final-p,#g1 .label,#g1 h1,#g1 .btn,#g1 .hdots,#g2 .label,#g2 h2,#g2 .btn,#g3 .pill,#g3 h2,#g3 .btn,#stage .logo{opacity:0}
+#stage .nav a,#stage .search,#stage .signin,#stage .burger{color:transparent!important;background:transparent!important}
+#stage .burger span{background:transparent}
 </style>
 </head>
 <body>
@@ -176,34 +182,49 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
   <div id="space">
     <!-- 1. hero -->
     <div class="grp" id="g1">
-      <div class="abs label" style="left:18.3%;top:26.4%;color:var(--label);border-bottom:1.5px solid currentColor;padding-bottom:.25cqw">Section 1</div>
-      <h1 class="abs h" style="left:18.1%;top:31.4%;font-size:7.8cqw;line-height:.9;color:var(--ink)">Fresh has<br>a wild side.</h1>
-      <p class="abs p" style="left:18.6%;top:57.8%;width:33.4%">Lorem ipsum wil is wiet componible for<br>eeore mtaring alit. emor was to aeccunul<br>cotgratat formains, and cotloes.</p>
-      <a href="#" data-go="68" class="abs btn solid" style="left:18.6%;top:70.5%;width:13.6%;height:5%">Been more</a>
+      <img class="gl" src="glyphs/p1.webp" alt="" aria-hidden="true" style="left:18.375%;top:57.650%;width:34.438%">
+      <img class="gl" src="glyphs/label1.webp" alt="" aria-hidden="true" style="left:17.938%;top:26.550%;width:8.000%">
+      <img class="gl" src="glyphs/h1.webp" alt="" aria-hidden="true" style="left:18.125%;top:32.350%;width:43.188%">
+      <img class="gl" src="glyphs/btn1.webp" alt="" aria-hidden="true" style="left:18.250%;top:69.850%;width:14.500%">
+      <img class="gl" src="glyphs/dots.webp" alt="" aria-hidden="true" style="left:45.875%;top:89.650%;width:8.250%">
+      <div class="abs label" style="left:18.238%;top:26.5%;color:var(--label);border-bottom:1.5px solid currentColor;padding-bottom:.25cqw;font-size:1.829cqw">Section 1</div>
+      <h1 class="abs h" style="left:18.413%;top:31.9%;font-size:7.8cqw;line-height:.9;color:var(--ink)">Fresh has<br>a wild side.</h1>
+      <p class="abs p" style="left:18.6%;top:57.5%;width:33.4%;font-size:1.77cqw">Lorem ipsum wil is wiet componible for<br>eeore mtaring alit. emor was to aeccunul<br>cotgratat formains, and cotloes.</p>
+      <a href="#" data-go="68" class="abs btn solid" style="left:18.663%;top:70.5%;width:13.6%;height:5%">Been more</a>
       <button class="abs circ" style="left:3.7%;top:51%" aria-label="Previous" data-go="0">‹</button>
       <button class="abs circ" style="left:95.8%;top:50.2%" aria-label="Next" data-go="68">›</button>
       <div class="abs hdots" style="left:49.7%;top:90.2%"><i class="on" data-go="0"></i><i data-go="68"></i><i data-go="150"></i><i data-go="232"></i></div>
     </div>
     <!-- 2. it all comes together -->
     <div class="grp" id="g2">
-      <div class="abs label" style="left:14.6%;top:17.6%;color:var(--red)">Section 2.</div>
-      <h2 class="abs h" style="left:14.5%;top:21.2%;font-size:5.95cqw;line-height:.92;color:var(--red)">It all comes<br>together.</h2>
-      <p class="abs p" style="left:14.75%;top:43.6%;width:27.5%">The toreed camoe of ail emery<br>beingegilt. en cioditot crecate their<br>tumigm, and dototat alleff creooe.</p>
-      <a href="#" data-go="150" class="abs btn line" style="left:14.75%;top:55.8%;width:12.4%;height:5%">Read more</a>
+      <img class="gl" src="glyphs/p2.webp" alt="" aria-hidden="true" style="left:14.500%;top:43.830%;width:27.250%">
+      <img class="gl" src="glyphs/label2.webp" alt="" aria-hidden="true" style="left:14.312%;top:17.330%;width:10.125%">
+      <img class="gl" src="glyphs/h2.webp" alt="" aria-hidden="true" style="left:14.375%;top:23.430%;width:33.938%">
+      <img class="gl" src="glyphs/btn2.webp" alt="" aria-hidden="true" style="left:14.500%;top:55.530%;width:13.000%">
+      <div class="abs label" style="left:14.537%;top:17.3%;color:var(--red);font-size:2.188cqw">Section 2.</div>
+      <h2 class="abs h" style="left:14.625%;top:23.7%;font-size:5.941cqw;line-height:.92;color:var(--red)">It all comes<br>together.</h2>
+      <p class="abs p" style="left:14.813%;top:43.7%;width:27.5%;font-size:1.608cqw">The toreed camoe of ail emery<br>beingegilt. en cioditot crecate their<br>tumigm, and dototat alleff creooe.</p>
+      <a href="#" data-go="150" class="abs btn line" style="left:14.813%;top:55.8%;width:12.4%;height:5%">Read more</a>
       <button class="abs circ" style="left:95.9%;top:50%" aria-label="Next" data-go="150">›</button>
     </div>
     <!-- 3. wildly good pizza -->
     <div class="grp" id="g3">
-      <div class="abs pill" style="left:50.3%;top:12.6%;width:17.4%;height:4.4%">YLAIOE BAKE TWE</div>
-      <h2 class="abs h final-h" style="left:50%;top:17.3%;font-size:7.9cqw;line-height:1.05">Wildly good pizza</h2>
-      <p class="abs final-p" style="left:50%;top:80.4%;width:42%">Lorem laum dinibols ias soocoe pooles and hamo text<br>poaldemgepe, cladies, with <a href="#" data-go="232">pick your pizza.</a></p>
-      <a href="#" data-go="232" class="abs btn cream" style="left:50%;top:87.6%;width:24.1%;height:5.6%">PICK YOUR FAVOURITE</a>
+      <img class="gl" src="glyphs/p3.webp" alt="" aria-hidden="true" style="left:28.938%;top:80.200%;width:42.125%">
+      <img class="gl" src="glyphs/pill.webp" alt="" aria-hidden="true" style="left:41.375%;top:11.200%;width:17.938%">
+      <img class="gl" src="glyphs/h3.webp" alt="" aria-hidden="true" style="left:15.375%;top:16.000%;width:68.938%">
+      <img class="gl" src="glyphs/btn3.webp" alt="" aria-hidden="true" style="left:37.625%;top:87.600%;width:24.750%">
+      <div class="abs pill" style="left:50.3%;top:11.7%;width:17.4%;height:4.1%">YLAIOE BAKE TWE</div>
+      <h2 class="abs h final-h" style="left:49.813%;top:14.8%;font-size:7.914cqw;line-height:1.05">Wildly good pizza</h2>
+      <p class="abs final-p" style="left:50%;top:80.3%;width:42%;font-size:1.62cqw">Lorem laum dinibols ias soocoe pooles and hamo text<br>poaldemgepe, cladies, with <a href="#" data-go="232">pick your pizza.</a></p>
+      <a href="#" data-go="232" class="abs btn cream" style="left:49.938%;top:88.2%;width:24.1%;height:5.6%">PICK YOUR FAVOURITE</a>
     </div>
 
     <!-- objects that pass in front of the text -->
     <canvas id="fcv"></canvas>
     <!-- NAV -->
     <div class="abs navbg" id="navbg"></div>
+    <img class="gl" src="glyphs/logo.webp" alt="" aria-hidden="true" style="left:2.438%;top:4.400%;width:10.000%">
+    <img class="gl" src="glyphs/nav.webp" alt="" aria-hidden="true" style="left:35.438%;top:3.000%;width:62.438%">
     <a href="#" data-go="0" class="abs logo">Wilda</a>
     <nav class="abs nav">
       <a href="#" class="on" data-go="0" data-sec="0" style="left:37.7%">Home</a>
@@ -224,7 +245,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
 (() => {
   const N = 233;                 // logical timeline (video frames)
   const NI = 463;                // images on disk (RIFE-interpolated)
-  const toI = f => f * (NI - 1) / (N - 1);
+  const toI = f => Math.min(f * 2, NI - 1);     // RIFE: image 2k = video frame k
   const src = i => 'frames/' + String(i).padStart(3, '0') + '.webp';
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -325,16 +346,19 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
   // parallax input: mouse on desktop (smoothed), scroll velocity on phones
   const PAR = { mx: 0, my: 0, tx: 0, ty: 0, vel: 0, off: [0, 0], moving: false };
   const OFF_MAX = 0.011;                // subtle: ~8px for near objects on a 1600px screen
+  // depth follows the mouse while it moves, then glides back so the resting frame matches the video exactly
+  let parLastMove = -1e9;
   addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return;
-    PAR.tx = (e.clientX / innerWidth - .5) * 2; PAR.ty = (e.clientY / innerHeight - .5) * 2; wake(); }, { passive: true });
+    PAR.tx = (e.clientX / innerWidth - .5) * 2; PAR.ty = (e.clientY / innerHeight - .5) * 2; parLastMove = performance.now(); wake(); }, { passive: true });
   document.addEventListener('mouseleave', () => { PAR.tx = PAR.ty = 0; wake(); });
   function updateParallax(dt, phone, dFrame) {
     if (reduce) { PAR.off = [0, 0]; PAR.moving = false; return; }
-    const k = 1 - Math.exp(-dt / 140);
+    const k = 1 - Math.exp(-dt / (PAR.tx || PAR.ty ? 140 : 420));   // quick to follow, slow & soft to settle
     if (phone) { PAR.tx = 0; PAR.ty = clamp(-dFrame * 0.9, -1, 1); }
+    else if (performance.now() - parLastMove > 900) { PAR.tx = 0; PAR.ty = 0; }
     PAR.mx += (PAR.tx - PAR.mx) * k; PAR.my += (PAR.ty - PAR.my) * k;
     const nx = PAR.mx * OFF_MAX, ny = PAR.my * OFF_MAX * 0.7;
-    PAR.moving = Math.abs(PAR.tx - PAR.mx) + Math.abs(PAR.ty - PAR.my) > 0.002;
+    PAR.moving = Math.abs(PAR.tx - PAR.mx) + Math.abs(PAR.ty - PAR.my) > 0.002 || (PAR.tx || PAR.ty);
     PAR.changed = Math.abs(nx - PAR.off[0]) + Math.abs(ny - PAR.off[1]) > 1e-5;
     PAR.off = [nx, ny];
   }
@@ -343,7 +367,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
   function paint(P, f, sx, sy, sw, sh, W, H) {
     const fi = Math.round(toI(f)); const ia = usable(fi) ? fi : nearest(fi); if (ia < 0) return false;
     const img = usable(ia), [IW, IH] = dims(); P.last = img; P.crop = [sx / IW, sy / IH, sw / IW, sh / IH];
-    if (P.gl) P.draw(img, P.crop, Math.round(ia * (N - 1) / (NI - 1)), PAR.off); else P.ctx.drawImage(img, sx, sy, sw, sh, 0, 0, W, H);
+    if (P.gl) P.draw(img, P.crop, Math.round(ia / 2), PAR.off); else P.ctx.drawImage(img, sx, sy, sw, sh, 0, 0, W, H);
     return true;
   }
   const dims = () => { const i = nearest(0); const im = imgs[i]; return im ? [im.naturalWidth, im.naturalHeight] : [1920, 1200]; };
